@@ -8,8 +8,6 @@ function showInputError(formElement, inputElement, settings, errorMessage) {
         errorElement.textContent = errorMessage;
     }
 
-
-
     errorElement.classList.add(settings.errorClass)
 }
 
@@ -18,6 +16,7 @@ function hideInputError(formElement, inputElement, settings) {
     inputElement.classList.remove(settings.inputErrorClass)
     errorElement.classList.remove(settings.errorClass)
     errorElement.textContent = "";
+    
 }
 function checkInputValidity(formElement, inputElement, settings) {
     if(!inputElement.validity.valid) {
@@ -51,23 +50,26 @@ function toggleButtonState(inputList, buttonElement, settings) {
 }
 
 function setEventListeners(formElement, settings) {
+    
+    
     let buttonElement = formElement.querySelector(settings.submitButtonSelector)
     const inputList = Array.from(formElement.querySelectorAll(settings.inputSelector));
     inputList.forEach((inputElement) => {
         inputElement.addEventListener('input', () => {
+            disableSubmitButton(buttonElement, settings);
+            
             checkInputValidity(formElement, inputElement, settings);
             toggleButtonState(inputList, buttonElement, settings);
     })
     });
 }
 
-export function clearValidation() {
+export function clearValidation(formElement, settings) {
 
 }
 
 export function enableValidation(settings) {
     const formList = Array.from(document.querySelectorAll(settings.formSelector))
-    // console.log('formList:', formList); // Показывает массив объектов
     formList.forEach((form) => {
         setEventListeners(form, settings);
     });
