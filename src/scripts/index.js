@@ -38,6 +38,16 @@ const avatarFormModalWindow = document.querySelector(".popup_type_edit-avatar");
 const avatarForm = avatarFormModalWindow.querySelector(".popup__form");
 const avatarInput = avatarForm.querySelector(".popup__input");
 
+// Создание объекта с настройками валидации
+const validationSettings = {
+  formSelector: ".popup__form",     
+  inputSelector: ".popup__input",   
+  submitButtonSelector: ".popup__button",
+  inactiveButtonClass: "popup__button_disabled", 
+  inputErrorClass: "popup__input_type_error", 
+  errorClass: "popup__error_visible",
+};
+
 const handlePreviewPicture = ({ name, link }) => {
   imageElement.src = link;
   imageElement.alt = name;
@@ -75,6 +85,8 @@ const handleCardFormSubmit = (evt) => {
   );
 
   closeModalWindow(cardFormModalWindow);
+  // profileForm.reset();
+  clearValidation(cardForm, validationSettings);
 };
 
 // EventListeners
@@ -86,16 +98,19 @@ openProfileFormButton.addEventListener("click", () => {
   profileTitleInput.value = profileTitle.textContent;
   profileDescriptionInput.value = profileDescription.textContent;
   openModalWindow(profileFormModalWindow);
+  clearValidation(profileForm, validationSettings);
 });
 
 profileAvatar.addEventListener("click", () => {
   avatarForm.reset();
   openModalWindow(avatarFormModalWindow);
+  clearValidation(avatarForm, validationSettings);
 });
 
 openCardFormButton.addEventListener("click", () => {
   cardForm.reset();
   openModalWindow(cardFormModalWindow);
+  clearValidation(cardForm, validationSettings);
 });
 
 // отображение карточек
@@ -115,15 +130,7 @@ allPopups.forEach((popup) => {
   setCloseModalWindowEventListeners(popup);
 });
 
-// Создание объекта с настройками валидации
-const validationSettings = {
-  formSelector: ".popup__form",     /*Используется*/
-  inputSelector: ".popup__input",   /*Используется*/
-  submitButtonSelector: ".popup__button",
-  inactiveButtonClass: "popup__button_disabled",  /*Используется*/
-  inputErrorClass: "popup__input_type_error", 
-  errorClass: "popup__error_visible",/*Используется*/
-};
+
 
 // включение валидации вызовом enableValidation
 // все настройки передаются при вызове

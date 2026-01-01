@@ -18,6 +18,7 @@ function hideInputError(formElement, inputElement, settings) {
     errorElement.textContent = "";
     
 }
+
 function checkInputValidity(formElement, inputElement, settings) {
     if(!inputElement.validity.valid) {
         showInputError(formElement, inputElement, settings, inputElement.validationMessage);
@@ -34,11 +35,13 @@ function hasInvalidInput(inputList) {
 }
 
 function disableSubmitButton(buttonElement, settings) {
-    buttonElement.classList.add(settings.inactiveButtonClass)
+    buttonElement.classList.add(settings.inactiveButtonClass);
+    buttonElement.disabled = true;
 }
 
 function enableSubmitButton(buttonElement, settings) {
-    buttonElement.classList.remove(settings.inactiveButtonClass)
+    buttonElement.classList.remove(settings.inactiveButtonClass);
+    buttonElement.disabled = false;
 }
 
 function toggleButtonState(inputList, buttonElement, settings) {
@@ -50,14 +53,10 @@ function toggleButtonState(inputList, buttonElement, settings) {
 }
 
 function setEventListeners(formElement, settings) {
-    
-    
-    let buttonElement = formElement.querySelector(settings.submitButtonSelector)
+    const buttonElement = formElement.querySelector(settings.submitButtonSelector)
     const inputList = Array.from(formElement.querySelectorAll(settings.inputSelector));
     inputList.forEach((inputElement) => {
         inputElement.addEventListener('input', () => {
-            disableSubmitButton(buttonElement, settings);
-            
             checkInputValidity(formElement, inputElement, settings);
             toggleButtonState(inputList, buttonElement, settings);
     })
@@ -65,7 +64,12 @@ function setEventListeners(formElement, settings) {
 }
 
 export function clearValidation(formElement, settings) {
-
+    const buttonElement = formElement.querySelector(settings.submitButtonSelector);
+    const inputList = Array.from(formElement.querySelectorAll(settings.inputSelector));
+    inputList.forEach((inputElement) => {
+        hideInputError(formElement, inputElement, settings)
+    })
+    disableSubmitButton(buttonElement, settings);
 }
 
 export function enableValidation(settings) {
