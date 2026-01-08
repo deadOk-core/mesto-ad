@@ -6,7 +6,7 @@
   Из index.js не допускается что то экспортировать
 */
 
-import { initialCards } from "./cards.js";
+import { getCardList, getUserInfo } from "./components/api.js";
 import { createCardElement, deleteCard, likeCard } from "./components/card.js";
 import { openModalWindow, closeModalWindow, setCloseModalWindowEventListeners } from "./components/modal.js";
 import { enableValidation, clearValidation } from "./components/validation.js";
@@ -113,26 +113,33 @@ openCardFormButton.addEventListener("click", () => {
   clearValidation(cardForm, validationSettings);
 });
 
-// отображение карточек
-initialCards.forEach((data) => {
-  placesWrap.append(
-    createCardElement(data, {
-      onPreviewPicture: handlePreviewPicture,
-      onLikeIcon: likeCard,
-      onDeleteCard: deleteCard,
-    })
-  );
-});
-
 //настраиваем обработчики закрытия попапов
 const allPopups = document.querySelectorAll(".popup");
 allPopups.forEach((popup) => {
   setCloseModalWindowEventListeners(popup);
 });
 
-
-
 // включение валидации вызовом enableValidation
 // все настройки передаются при вызове
 
 enableValidation(validationSettings); 
+
+Promise.all([getCardList(), getUserInfo()])
+  .then(([cards, userData]) => {
+
+  cards.forEach((data) => {
+    placesWrap.append(
+      createCardElement(data, {
+        onPreviewPicture: handlePreviewPicture,
+        onLikeIcon: likeCard,
+        onDeleteCard: deleteCard,
+      })
+    );
+  });
+  profileTitle.textContent = userData.name;
+  profileDescription.textContent = userData.about;
+  profileAvatar.style.backgroundImage = `url(${userData.avatar})`;
+  })
+  .catch((err) => {
+    console.log(err); // В случае возникновения ошибки выводим её в консоль
+  });
