@@ -6,7 +6,7 @@
   Из index.js не допускается что то экспортировать
 */
 
-import { getCardList, getUserInfo } from "./components/api.js";
+import { getCardList, getUserInfo, setUserInfo, setUserAvatar, setCard } from "./components/api.js";
 import { createCardElement, deleteCard, likeCard } from "./components/card.js";
 import { openModalWindow, closeModalWindow, setCloseModalWindowEventListeners } from "./components/modal.js";
 import { enableValidation, clearValidation } from "./components/validation.js";
@@ -16,7 +16,9 @@ const placesWrap = document.querySelector(".places__list");
 const profileFormModalWindow = document.querySelector(".popup_type_edit");
 const profileForm = profileFormModalWindow.querySelector(".popup__form");
 const profileTitleInput = profileForm.querySelector(".popup__input_type_name");
-const profileDescriptionInput = profileForm.querySelector(".popup__input_type_description");
+const profileDescriptionInput = profileForm.querySelector(
+  ".popup__input_type_description"
+);
 
 const cardFormModalWindow = document.querySelector(".popup_type_new-card");
 const cardForm = cardFormModalWindow.querySelector(".popup__form");
@@ -40,11 +42,11 @@ const avatarInput = avatarForm.querySelector(".popup__input");
 
 // Создание объекта с настройками валидации
 const validationSettings = {
-  formSelector: ".popup__form",     
-  inputSelector: ".popup__input",   
+  formSelector: ".popup__form",
+  inputSelector: ".popup__input",
   submitButtonSelector: ".popup__button",
-  inactiveButtonClass: "popup__button_disabled", 
-  inputErrorClass: "popup__input_type_error", 
+  inactiveButtonClass: "popup__button_disabled",
+  inputErrorClass: "popup__input_type_error",
   errorClass: "popup__error_visible",
 };
 
@@ -57,35 +59,61 @@ const handlePreviewPicture = ({ name, link }) => {
 
 const handleProfileFormSubmit = (evt) => {
   evt.preventDefault();
-  profileTitle.textContent = profileTitleInput.value;
-  profileDescription.textContent = profileDescriptionInput.value;
-  closeModalWindow(profileFormModalWindow);
+  setUserInfo({
+    name: profileTitleInput.value,
+    about: profileDescriptionInput.value,
+  })
+    .then((userData) => {
+      profileTitle.textContent = userData.name;
+      profileDescription.textContent = userData.about;
+      closeModalWindow(profileFormModalWindow);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
 
 const handleAvatarFromSubmit = (evt) => {
   evt.preventDefault();
-  profileAvatar.style.backgroundImage = `url(${avatarInput.value})`;
-  closeModalWindow(avatarFormModalWindow);
+  setUserAvatar({
+    avatar: avatarInput.value,
+  })
+    .then((userData) => {
+      profileAvatar.style.backgroundImage = `url(${userData.avatar})`;
+      closeModalWindow(avatarFormModalWindow);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
 
 const handleCardFormSubmit = (evt) => {
   evt.preventDefault();
-  placesWrap.prepend(
-    createCardElement(
-      {
-        name: cardNameInput.value,
-        link: cardLinkInput.value,
-      },
-      {
-        onPreviewPicture: handlePreviewPicture,
-        onLikeIcon: likeCard,
-        onDeleteCard: deleteCard,
-      }
-    )
-  );
+  setCard({
+    name: cardNameInput.value,
+    link: cardLinkInput.value,
+  })
+    .then((userData) => {
+      placesWrap.prepend(
+        createCardElement(
+          {
+            name: userData.name,
+            link: userData.link,
+          },
+          {
+            onPreviewPicture: handlePreviewPicture,
+            onLikeIcon: likeCard,
+            onDeleteCard: deleteCard,
+          }
+        )
+      );
+    })
+
+    .catch((err) => {
+      console.log(err);
+    });
 
   closeModalWindow(cardFormModalWindow);
-  // profileForm.reset();
   clearValidation(cardForm, validationSettings);
 };
 
@@ -122,23 +150,30 @@ allPopups.forEach((popup) => {
 // включение валидации вызовом enableValidation
 // все настройки передаются при вызове
 
-enableValidation(validationSettings); 
+enableValidation(validationSettings);
+
+const toggleDelete = (card, userData, buttonElement) => {
+  if (card.owner._id !== userData._id) {
+    buttonElement.style.display = "none";
+  }
+};
 
 Promise.all([getCardList(), getUserInfo()])
   .then(([cards, userData]) => {
-
-  cards.forEach((data) => {
-    placesWrap.append(
-      createCardElement(data, {
+    cards.forEach((card) => {
+      const cardElement = createCardElement(card, {
         onPreviewPicture: handlePreviewPicture,
         onLikeIcon: likeCard,
         onDeleteCard: deleteCard,
-      })
-    );
-  });
-  profileTitle.textContent = userData.name;
-  profileDescription.textContent = userData.about;
-  profileAvatar.style.backgroundImage = `url(${userData.avatar})`;
+      });
+      placesWrap.append(cardElement);
+      const deleteButton = cardElement.querySelector(".card__control-button_type_delete");
+      toggleDelete(card, userData, deleteButton); // Передаем конкретную кнопку
+    });
+
+    profileTitle.textContent = userData.name;
+    profileDescription.textContent = userData.about;
+    profileAvatar.style.backgroundImage = `url(${userData.avatar})`;
   })
   .catch((err) => {
     console.log(err); // В случае возникновения ошибки выводим её в консоль
