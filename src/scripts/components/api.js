@@ -56,5 +56,12 @@ export const setCard = ({ name, link }) => {
       name,
       link,
     }),
-  })
+  }).then(getResponseData);
+}
+
+export const deleteUserCard = ({ userCard }) => {
+  return fetch(`${config.baseUrl}/cards/${userCard._id}`, {
+    method: "DELETE",
+    headers: config.headers,
+  }).then(getResponseData);
 }

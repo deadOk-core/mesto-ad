@@ -6,9 +6,20 @@
   Из index.js не допускается что то экспортировать
 */
 
-import { getCardList, getUserInfo, setUserInfo, setUserAvatar, setCard } from "./components/api.js";
+import {
+  getCardList,
+  getUserInfo,
+  setUserInfo,
+  setUserAvatar,
+  setCard,
+  deleteUserCard,
+} from "./components/api.js";
 import { createCardElement, deleteCard, likeCard } from "./components/card.js";
-import { openModalWindow, closeModalWindow, setCloseModalWindowEventListeners } from "./components/modal.js";
+import {
+  openModalWindow,
+  closeModalWindow,
+  setCloseModalWindowEventListeners,
+} from "./components/modal.js";
 import { enableValidation, clearValidation } from "./components/validation.js";
 
 // DOM узлы
@@ -164,11 +175,23 @@ Promise.all([getCardList(), getUserInfo()])
       const cardElement = createCardElement(card, {
         onPreviewPicture: handlePreviewPicture,
         onLikeIcon: likeCard,
-        onDeleteCard: deleteCard,
+        onDeleteCard: () => {
+          //Делаем запрос на удаление
+          deleteUserCard({ userCard: card })
+            .then(() => {
+              cardElement.remove();
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        },
       });
+
       placesWrap.append(cardElement);
-      const deleteButton = cardElement.querySelector(".card__control-button_type_delete");
-      toggleDelete(card, userData, deleteButton); // Передаем конкретную кнопку
+      const deleteButton = cardElement.querySelector(
+        ".card__control-button_type_delete"
+      );
+      toggleDelete(card, userData, deleteButton);
     });
 
     profileTitle.textContent = userData.name;
