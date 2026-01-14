@@ -52,11 +52,6 @@ const avatarFormModalWindow = document.querySelector(".popup_type_edit-avatar");
 const avatarForm = avatarFormModalWindow.querySelector(".popup__form");
 const avatarInput = avatarForm.querySelector(".popup__input");
 
-// const cardTemplate = document.getElementById("card-template");
-// const cardClone = cardTemplate.contentEditable.querySelector(".places__item").cloneNode(true);
-
-
-
 //переименовать переменные, выбрать попап с модальным окном для подтверждения удаления:
 // const agreementModalWindow = document.querySelector(".popup_type_remove-card");
 // const agreementForm = agreementModalWindow.querySelector(".popup__form");
@@ -79,9 +74,26 @@ const handlePreviewPicture = ({ name, link }) => {
   imageCaption.textContent = name;
   openModalWindow(imageModalWindow);
 };
+//у эти трех ниже из названий надо достать кнопки и сделать их константами переменными
+const profileFormButton = profileForm.querySelector(".popup__button");
+const cardFormButton = cardForm.querySelector(".popup__button");
+const avatarFormButton = avatarForm.querySelector(".popup__button");
+//для перпеменных выше использовать функции загрузки текста
+
+const showLoading = (button, buttonText) => {
+  // Сохраняем оригинальный текст
+  button.dataset.originalText = button.textContent;
+  button.textContent = `${buttonText}...`;
+};
+
+const hideLoading = (button) => {
+  // Восстанавливаем из сохраненного
+  button.textContent = button.dataset.originalText;
+};
 
 const handleProfileFormSubmit = (evt) => {
   evt.preventDefault();
+  showLoading(profileFormButton, "Сохранение");
   setUserInfo({
     name: profileTitleInput.value,
     about: profileDescriptionInput.value,
@@ -93,25 +105,31 @@ const handleProfileFormSubmit = (evt) => {
     })
     .catch((err) => {
       console.log(err);
-    });
+    })
+    .finally(() => {
+      hideLoading(profileFormButton);
+    })
 };
 
 const handleAvatarFromSubmit = (evt) => {
   evt.preventDefault();
-  setUserAvatar({
-    avatar: avatarInput.value,
-  })
+  showLoading(avatarFormButton, "Сохранение");
+  setUserAvatar(avatarInput.value)
     .then((userData) => {
       profileAvatar.style.backgroundImage = `url(${userData.avatar})`;
       closeModalWindow(avatarFormModalWindow);
     })
     .catch((err) => {
       console.log(err);
+    })
+    .finally(() => {
+      hideLoading(avatarFormButton);
     });
 };
 
 const handleCardFormSubmit = (evt) => {
   evt.preventDefault();
+  showLoading(cardFormButton, "Создание");
   setCard({
     name: cardNameInput.value,
     link: cardLinkInput.value,
@@ -130,13 +148,15 @@ const handleCardFormSubmit = (evt) => {
           }
         )
       );
+      closeModalWindow(cardFormModalWindow);
     })
-
     .catch((err) => {
       console.log(err);
+    })
+    .finally(() => {
+      hideLoading(cardFormButton);
     });
 
-  closeModalWindow(cardFormModalWindow);
   clearValidation(cardForm, validationSettings);
 };
 
@@ -218,16 +238,14 @@ const isCardLiked = (cardElement) => {
 Promise.all([getCardList(), getUserInfo()])
   .then(([cards, userData]) => {
     cards.forEach((card) => {
-      // const cardLikeCount = cardElement.querySelector(".card__like-count");
-      
       const cardElement = createCardElement(card, {
         onPreviewPicture: handlePreviewPicture,
         onLikeIcon: () => {
           const likeButton = cardElement.querySelector('.card__like-button');
           const cardLikeCount = cardElement.querySelector(".card__like-count");
+          //Запрос на лайк
           changeLikeCardStatus(card._id, isCardLiked(likeButton))
           .then((updateCard) => {
-            
             likeCard(likeButton)
             cardLikeCount.textContent = updateCard.likes.length;
           })
@@ -236,7 +254,7 @@ Promise.all([getCardList(), getUserInfo()])
           })
         },
         onDeleteCard: () => {
-          //Делаем запрос на удаление
+          //Запрос на удаление
           deleteUserCard({ userCard: card })
             .then(() => {
               cardElement.remove();
