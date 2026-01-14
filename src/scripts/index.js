@@ -52,6 +52,11 @@ const avatarFormModalWindow = document.querySelector(".popup_type_edit-avatar");
 const avatarForm = avatarFormModalWindow.querySelector(".popup__form");
 const avatarInput = avatarForm.querySelector(".popup__input");
 
+// const cardTemplate = document.getElementById("card-template");
+// const cardClone = cardTemplate.contentEditable.querySelector(".places__item").cloneNode(true);
+
+
+
 //переименовать переменные, выбрать попап с модальным окном для подтверждения удаления:
 // const agreementModalWindow = document.querySelector(".popup_type_remove-card");
 // const agreementForm = agreementModalWindow.querySelector(".popup__form");
@@ -213,12 +218,19 @@ const isCardLiked = (cardElement) => {
 Promise.all([getCardList(), getUserInfo()])
   .then(([cards, userData]) => {
     cards.forEach((card) => {
+      // const cardLikeCount = cardElement.querySelector(".card__like-count");
+      
       const cardElement = createCardElement(card, {
         onPreviewPicture: handlePreviewPicture,
         onLikeIcon: () => {
           const likeButton = cardElement.querySelector('.card__like-button');
-          changeLikeCardStatus(card._id, isCardLiked(cardElement))
-          .then(() => likeCard(likeButton))
+          const cardLikeCount = cardElement.querySelector(".card__like-count");
+          changeLikeCardStatus(card._id, isCardLiked(likeButton))
+          .then((updateCard) => {
+            
+            likeCard(likeButton)
+            cardLikeCount.textContent = updateCard.likes.length;
+          })
           .catch((err) => {
             console.log("ошибка при лайке:", err);
           })
@@ -240,6 +252,9 @@ Promise.all([getCardList(), getUserInfo()])
         ".card__control-button_type_delete"
       );
       hideOtherDeleteButtons(card, userData, deleteButton);
+
+      const cardLikeCount = cardElement.querySelector(".card__like-count");
+      cardLikeCount.textContent = card.likes.length;
     });
 
     profileTitle.textContent = userData.name;
