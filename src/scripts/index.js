@@ -13,12 +13,13 @@ import {
   setUserAvatar,
   setCard,
   deleteUserCard,
+  changeLikeCardStatus
 } from "./components/api.js";
 import { createCardElement, deleteCard, likeCard } from "./components/card.js";
 import {
   openModalWindow,
   closeModalWindow,
-  setCloseModalWindowEventListeners,
+  setCloseModalWindowEventListeners
 } from "./components/modal.js";
 import { enableValidation, clearValidation } from "./components/validation.js";
 
@@ -50,6 +51,12 @@ const profileAvatar = document.querySelector(".profile__image");
 const avatarFormModalWindow = document.querySelector(".popup_type_edit-avatar");
 const avatarForm = avatarFormModalWindow.querySelector(".popup__form");
 const avatarInput = avatarForm.querySelector(".popup__input");
+
+//переименовать переменные, выбрать попап с модальным окном для подтверждения удаления:
+// const agreementModalWindow = document.querySelector(".popup_type_remove-card");
+// const agreementForm = agreementModalWindow.querySelector(".popup__form");
+// const agreeFormButton = agreementForm.querySelector(".popup__button");
+// const closeAgreementButton = agreementModalWindow.querySelector(".popup__close");
 
 // Создание объекта с настройками валидации
 const validationSettings = {
@@ -163,18 +170,59 @@ allPopups.forEach((popup) => {
 
 enableValidation(validationSettings);
 
-const toggleDelete = (card, userData, buttonElement) => {
+const hideOtherDeleteButtons = (card, userData, buttonElement) => {
   if (card.owner._id !== userData._id) {
     buttonElement.style.display = "none";
   }
 };
+
+// function showAgreementModalWindow(cardElement, card) {
+//   return function() {
+//     agreeFormButton.classList.remove("popup__button_disabled");
+//     openModalWindow(agreementModalWindow);
+//     //надо это разъединить
+//     agreementForm.addEventListener("submit", function submitHandler(evt) {
+//       evt.preventDefault();
+//       agreeFormButton.classList.add("popup__button_disabled");
+//       deleteUserCard({ userCard: card })
+//         .then(() => {
+//           cardElement.remove();
+//           closeModalWindow(agreementModalWindow);
+//           agreementForm.removeEventListener("submit", submitHandler);
+//         })
+//         .catch((err) => {
+//           console.log("Ошибка при удалении карточки:", err);
+//           closeModalWindow(agreementModalWindow);
+//           agreementForm.removeEventListener("submit", submitHandler);
+//         });
+//     });
+
+//     closeAgreementButton.addEventListener("click", function closeHandler() {
+//       closeModalWindow(agreementModalWindow);
+//       agreeFormButton.classList.add("popup__button_disabled");
+//       agreementForm.removeEventListener("submit", submitHandler);
+//       closeAgreementButton.removeEventListener("click", closeHandler);
+//     });
+//   };
+// }
+
+const isCardLiked = (cardElement) => {
+  return (cardElement.classList.contains("card__like-button_is-active"));
+}
 
 Promise.all([getCardList(), getUserInfo()])
   .then(([cards, userData]) => {
     cards.forEach((card) => {
       const cardElement = createCardElement(card, {
         onPreviewPicture: handlePreviewPicture,
-        onLikeIcon: likeCard,
+        onLikeIcon: () => {
+          const likeButton = cardElement.querySelector('.card__like-button');
+          changeLikeCardStatus(card._id, isCardLiked(cardElement))
+          .then(() => likeCard(likeButton))
+          .catch((err) => {
+            console.log("ошибка при лайке:", err);
+          })
+        },
         onDeleteCard: () => {
           //Делаем запрос на удаление
           deleteUserCard({ userCard: card })
@@ -182,7 +230,7 @@ Promise.all([getCardList(), getUserInfo()])
               cardElement.remove();
             })
             .catch((err) => {
-              console.log(err);
+              console.log("ошибка при удалении:", err);
             });
         },
       });
@@ -191,7 +239,7 @@ Promise.all([getCardList(), getUserInfo()])
       const deleteButton = cardElement.querySelector(
         ".card__control-button_type_delete"
       );
-      toggleDelete(card, userData, deleteButton);
+      hideOtherDeleteButtons(card, userData, deleteButton);
     });
 
     profileTitle.textContent = userData.name;
