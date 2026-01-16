@@ -70,7 +70,6 @@ const cardFormButton = cardForm.querySelector(".popup__button");
 const avatarFormButton = avatarForm.querySelector(".popup__button");
 
 const showLoading = (button, buttonText) => {
-  // Сохраняем оригинальный текст
   button.dataset.originalText = button.textContent;
   button.textContent = `${buttonText}...`;
 };
@@ -190,16 +189,16 @@ const hideOtherDeleteButtons = (card, userData, deleteButton) => {
   }
 };
 
-const cardLikedStart = (card, userData, likeButton) => {
+const isCardLikedStart = (card, userData, likeButton) => {
   card.likes.forEach((likeUserData) => {
     if (likeUserData._id === userData._id) {
       likeButton.classList.add("card__like-button_is-active");
-    }
-  });
-};
+  }
+  })
+}
 
 const isCardLiked = (cardElement) => {
-  return !cardElement.classList.contains("card__like-button_is-active");
+  return cardElement.classList.contains("card__like-button_is-active");
 };
 
 Promise.all([getCardList(), getUserInfo()])
@@ -211,20 +210,20 @@ Promise.all([getCardList(), getUserInfo()])
           const likeButton = cardElement.querySelector(".card__like-button");
           const cardLikeCount = cardElement.querySelector(".card__like-count");
           //Запрос на лайк
-          changeLikeCardStatus(card._id, isCardLiked(cardElement))
+          changeLikeCardStatus(card._id, isCardLiked(likeButton))
             .then((updateCard) => {
               likeCard(likeButton);
               cardLikeCount.textContent = updateCard.likes.length;
             })
             .catch((err) => {
               console.log("ошибка при лайке:", err);
-            });
+            })
         },
         onDeleteCard: () => {
           //Запрос на удаление
           deleteUserCard({ userCard: card })
             .then(() => {
-              deleteCard(cardElement);
+              cardElement.remove();
             })
             .catch((err) => {
               console.log("ошибка при удалении:", err);
@@ -232,10 +231,10 @@ Promise.all([getCardList(), getUserInfo()])
         },
         onInfoCard: () => {
           handleInfoClick(card._id);
-        },
+        }
       });
       const likeButton = cardElement.querySelector(".card__like-button");
-      cardLikedStart(card, userData, likeButton);
+      isCardLikedStart(card, userData, likeButton);
 
       placesWrap.append(cardElement);
       const deleteButton = cardElement.querySelector(".card__control-button_type_delete");
@@ -277,8 +276,8 @@ const createUserListItem = (userName) => {
 };
 
 const handleInfoClick = (cardId) => {
-  cardInfoModalInfoList.innerHTML = "";
-  popupList.innerHTML = "";
+  cardInfoModalInfoList.innerHTML = '';
+  popupList.innerHTML = '';
 
   /* Для вывода корректной информации необходимо получить актуальные данные с сервера. */
   getCardList()
