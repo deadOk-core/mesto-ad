@@ -34,6 +34,9 @@ const profileTitle = document.querySelector(".profile__title");
 const profileDescription = document.querySelector(".profile__description");
 const profileAvatar = document.querySelector(".profile__image");
 
+const agreementModalWindow = document.querySelector(".popup_type_remove-card");
+const agreementForm = agreementModalWindow.querySelector(".popup__form");
+
 const avatarFormModalWindow = document.querySelector(".popup_type_edit-avatar");
 const avatarForm = avatarFormModalWindow.querySelector(".popup__form");
 const avatarInput = avatarForm.querySelector(".popup__input");
@@ -68,6 +71,12 @@ const handlePreviewPicture = ({ name, link }) => {
 const profileFormButton = profileForm.querySelector(".popup__button");
 const cardFormButton = cardForm.querySelector(".popup__button");
 const avatarFormButton = avatarForm.querySelector(".popup__button");
+const agreementFormButton = agreementForm.querySelector(".popup__button");
+
+let agreementSettings = {
+  cardData: null,
+  currentCardElement: null,
+};
 
 const showLoading = (button, buttonText) => {
   button.dataset.originalText = button.textContent;
@@ -201,6 +210,42 @@ const isCardLiked = (cardElement) => {
   return cardElement.classList.contains("card__like-button_is-active");
 };
 
+const startProccesOpenAgreementModalWindow = (card, cardElement) => {
+  agreementSettings.cardData = card;
+  agreementSettings.currentCardElement = cardElement;
+
+  agreementFormButton.classList.remove("popup__button_disabled");
+  agreementFormButton.disabled = false;
+
+  openModalWindow(agreementModalWindow);
+}
+
+const handleAgreementFromSubmit = (evt) => {
+  evt.preventDefault();
+  showLoading(agreementFormButton, "Удаление");
+
+  //Запрос на удаление
+  deleteUserCard({ userCard: agreementSettings.cardData })
+    .then(() => {
+      agreementSettings.currentCardElement.remove();
+      agreementFormButton.classList.add("popup__button_disabled");
+      agreementFormButton.disabled = true;
+      closeModalWindow(agreementModalWindow);
+      agreementSettings = {
+        cardData: null,
+        currentCardElement: null,      
+      };
+    })
+    .catch((err) => {
+      console.log("ошибка при удалении:", err);
+    })
+    .finally(() => {
+      hideLoading(agreementFormButton);
+    })
+}
+
+agreementForm.addEventListener("submit", handleAgreementFromSubmit);
+
 Promise.all([getCardList(), getUserInfo()])
   .then(([cards, userData]) => {
     cards.forEach((card) => {
@@ -220,14 +265,7 @@ Promise.all([getCardList(), getUserInfo()])
             })
         },
         onDeleteCard: () => {
-          //Запрос на удаление
-          deleteUserCard({ userCard: card })
-            .then(() => {
-              cardElement.remove();
-            })
-            .catch((err) => {
-              console.log("ошибка при удалении:", err);
-            });
+          startProccesOpenAgreementModalWindow(card, cardElement);
         },
         onInfoCard: () => {
           handleInfoClick(card._id);
