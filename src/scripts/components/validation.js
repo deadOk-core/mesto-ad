@@ -1,27 +1,20 @@
 function showInputError(formElement, inputElement, settings, errorMessage) {
     const errorElement = formElement.querySelector(`#${inputElement.id}-error`);
-    inputElement.classList.add(settings.inputErrorClass)
-
-     if (inputElement.dataset.errorMessage){
-        errorElement.textContent = inputElement.dataset.errorMessage;
-    } else {
-        errorElement.textContent = errorMessage;
-    }
-
-    errorElement.classList.add(settings.errorClass)
+    inputElement.classList.add(settings.inputErrorClass);
+    errorElement.textContent = inputElement.dataset.errorMessage || errorMessage;
+    errorElement.classList.add(settings.errorClass);
 }
 
 function hideInputError(formElement, inputElement, settings) {
     const errorElement = formElement.querySelector(`#${inputElement.id}-error`);
-    inputElement.classList.remove(settings.inputErrorClass)
-    errorElement.classList.remove(settings.errorClass)
+    inputElement.classList.remove(settings.inputErrorClass);
+    errorElement.classList.remove(settings.errorClass);
     errorElement.textContent = "";
 }
 
 function checkInputValidity(formElement, inputElement, settings) {
     if(!inputElement.validity.valid) {
         showInputError(formElement, inputElement, settings, inputElement.validationMessage);
-        toggleButtonState(formElement, inputElement, settings);
     } else {
         hideInputError(formElement, inputElement, settings);
     }
