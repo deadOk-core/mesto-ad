@@ -225,7 +225,7 @@ const handleAgreementFromSubmit = (evt) => {
   showLoading(agreementFormButton, "Удаление");
 
   //Запрос на удаление
-  deleteUserCard({ userCard: agreementSettings.cardData })
+  deleteUserCard(agreementSettings.cardData)
     .then(() => {
       agreementSettings.currentCardElement.remove();
       agreementFormButton.classList.add("popup__button_disabled");

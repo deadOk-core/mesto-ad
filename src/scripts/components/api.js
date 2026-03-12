@@ -1,3 +1,5 @@
+import axios from "axios";
+
 /*файл содержит код запросов*/
 
 /*API-сервера и повторяющиеся заголовки запроса*/
@@ -9,66 +11,51 @@ const config = {
   },
 };
 
-/* Проверяем, успешно ли выполнен запрос, и отклоняем промис в случае ошибки. */
-const getResponseData = (res) => {
-  return res.ok ? res.json() : Promise.reject(`Ошибка: ${res.status}`);
-};
+/*Cоздание нового экземпляра Axios*/
+const sample = axios.create({
+  baseURL: config.baseUrl,
+  headers: config.headers,
+});
+
+const handleResponse = (response) => response.data;
 
 /*Получение данных пользователя с сервера*/
 export const getUserInfo = () => {
-  return fetch(`${config.baseUrl}/users/me`, { // Запрос к API-серверу
-    headers: config.headers, // Подставляем заголовки
-  }).then(getResponseData);  // Проверяем успешность выполнения запроса
+  return sample(`/users/me`).then(handleResponse);
 };
 
 export const getCardList = () => {
-  return fetch(`${config.baseUrl}/cards`, {
-    headers: config.headers,
-    }).then(getResponseData);
+  return sample(`/cards`).then(handleResponse);
 };
 
 export const setUserInfo = ({ name, about }) => {
-  return fetch(`${config.baseUrl}/users/me`, {
-    method: "PATCH",
-    headers: config.headers,
-    body: JSON.stringify({
+  return sample
+    .patch(`/users/me`, {
       name,
       about,
-    }),
-  }).then(getResponseData);
+    })
+    .then(handleResponse);
 };
 
 export const setUserAvatar = (avatar) => {
-  return fetch(`${config.baseUrl}/users/me/avatar`, {
-    method: "PATCH",
-    headers: config.headers,
-    body: JSON.stringify({
-      avatar,
-    }),
-  }).then(getResponseData);
-}
+  return sample.patch(`/users/me/avatar`, { avatar }).then(handleResponse);
+};
 
 export const setCard = ({ name, link }) => {
-  return fetch(`${config.baseUrl}/cards`, {
-    method: "POST",
-    headers: config.headers,
-    body: JSON.stringify({
+  return sample
+    .post(`/cards`, {
       name,
       link,
-    }),
-  }).then(getResponseData);
-}
+    })
+    .then(handleResponse);
+};
 
-export const deleteUserCard = ({ userCard }) => {
-  return fetch(`${config.baseUrl}/cards/${userCard._id}`, {
-    method: "DELETE",
-    headers: config.headers,
-  }).then(getResponseData);
-}
+export const deleteUserCard = (userCard) => {
+  return sample.delete(`/cards/${userCard._id}`).then(handleResponse);
+};
 
 export const changeLikeCardStatus = (cardID, isLiked) => {
-  return fetch(`${config.baseUrl}/cards/likes/${cardID}`, {
-    method: isLiked ?  "DELETE" : "PUT",
-    headers: config.headers,
-  }).then((res) => getResponseData(res));
+  return sample(`/cards/likes/${cardID}`, {
+    method: isLiked ? "DELETE" : "PUT"
+  }).then(handleResponse);
 };
