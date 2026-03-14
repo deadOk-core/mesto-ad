@@ -158,7 +158,6 @@ const handleCardFormSubmit = (evt) => {
           startProccesOpenAgreementModalWindow(newCard, cardElement);
         },
         onInfoCard: () => {
-          console.log("newCard", newCard);
           handleInfoClick(newCard._id);
         }
       });
@@ -232,8 +231,6 @@ const isCardLiked = (cardElement) => {
 const startProccesOpenAgreementModalWindow = (card, cardElement) => {
   agreementSettings.cardData = card;
   agreementSettings.currentCardElement = cardElement;
-  console.log("card", card);
-  console.log("cardElement", cardElement);
 
   agreementFormButton.classList.remove("popup__button_disabled");
   agreementFormButton.disabled = false;
