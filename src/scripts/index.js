@@ -123,20 +123,6 @@ const handleAvatarFromSubmit = (evt) => {
     });
 };
 
-const buttonSettings = (newCard, userData, cardElement) => {
-
-  const likeButton = cardElement.querySelector(".card__like-button");
-  isCardLikedStart(newCard, userData, likeButton);
-
-  const deleteButton = cardElement.querySelector(".card__control-button_type_delete");
-  hideOtherDeleteButtons(newCard, userData, deleteButton);
-  
-  const cardLikeCount = cardElement.querySelector(".card__like-count");
-  cardLikeCount.textContent = newCard.likes.length;
-
-  placesWrap.prepend(cardElement);
-}
-
 const handleCardFormSubmit = (evt) => {
   evt.preventDefault();
   showLoading(cardFormButton, "Создание");
@@ -160,9 +146,9 @@ const handleCardFormSubmit = (evt) => {
         onInfoCard: () => {
           handleInfoClick(newCard._id);
         }
-      });
+      }, newCard, userData);
 
-      buttonSettings(newCard, userData, cardElement);
+      placesWrap.prepend(cardElement);
       closeModalWindow(cardFormModalWindow);
     })
     .catch((err) => {
@@ -171,8 +157,6 @@ const handleCardFormSubmit = (evt) => {
     .finally(() => {
       hideLoading(cardFormButton);
     });
-
-  clearValidation(cardForm, validationSettings);
 };
 
 // EventListeners
@@ -209,20 +193,6 @@ allPopups.forEach((popup) => {
 // все настройки передаются при вызове
 
 enableValidation(validationSettings);
-
-const hideOtherDeleteButtons = (card, userData, deleteButton) => {
-  if (card.owner._id !== userData._id) {
-    deleteButton.style.display = "none";
-  }
-};
-
-const isCardLikedStart = (card, userData, likeButton) => {
-  card.likes.forEach((likeUserData) => {
-    if (likeUserData._id === userData._id) {
-      likeButton.classList.add("card__like-button_is-active");
-  }
-  })
-}
 
 const isCardLiked = (cardElement) => {
   return cardElement.classList.contains("card__like-button_is-active");
@@ -290,9 +260,9 @@ Promise.all([getCardList(), getUserInfo()])
         onInfoCard: () => {
           handleInfoClick(card._id);
         }
-      });
+      }, card, userData);
       
-      buttonSettings(card, userData, cardElement);
+      placesWrap.append(cardElement);
     });
     profileTitle.textContent = userData.name;
     profileDescription.textContent = userData.about;

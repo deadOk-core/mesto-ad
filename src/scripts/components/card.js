@@ -6,6 +6,20 @@ export const deleteCard = (cardElement) => {
   cardElement.remove();
 };
 
+const isCardLikedStart = (card, userData, likeButton) => {
+  card.likes.forEach((likeUserData) => {
+    if (likeUserData._id === userData._id) {
+      likeButton.classList.add("card__like-button_is-active");
+  }
+  })
+};
+
+const hideOtherDeleteButtons = (card, userData, deleteButton) => {
+  if (card.owner._id !== userData._id) {
+    deleteButton.style.display = "none";
+  }
+};
+
 const getTemplate = () => {
   return document
     .getElementById("card-template")
@@ -15,10 +29,11 @@ const getTemplate = () => {
 
 export const createCardElement = (
   data,
-  { onPreviewPicture, onLikeIcon, onDeleteCard, onInfoCard }
+  { onPreviewPicture, onLikeIcon, onDeleteCard, onInfoCard }, card, userData
 ) => {
   const cardElement = getTemplate();
   const likeButton = cardElement.querySelector(".card__like-button");
+  const cardLikeCount = cardElement.querySelector(".card__like-count");
   const deleteButton = cardElement.querySelector(".card__control-button_type_delete");
   const cardImage = cardElement.querySelector(".card__image");
   const iButton = cardElement.querySelector(".card__control-button_type_info");
@@ -27,10 +42,14 @@ export const createCardElement = (
   cardImage.alt = data.name;
   cardElement.querySelector(".card__title").textContent = data.name;
 
+  cardLikeCount.textContent = card.likes.length;
+  
+  isCardLikedStart(card, userData, likeButton);
   if (onLikeIcon) {
     likeButton.addEventListener("click", () => onLikeIcon(likeButton));
   }
 
+  hideOtherDeleteButtons(card, userData, deleteButton);
   if (onDeleteCard) {
     deleteButton.addEventListener("click", () => onDeleteCard(cardElement));
   }
