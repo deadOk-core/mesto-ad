@@ -131,12 +131,6 @@ const handleCardFormSubmit = (evt) => {
     link: cardLinkInput.value,
   })
     .then((newCard) => {
-      return getUserInfo()
-        .then((userData) => {
-          return { newCard, userData };
-        });
-    })
-    .then(({ newCard, userData }) => {
       const cardElement = createCardElement(newCard, {
         onPreviewPicture: handlePreviewPicture,
         onLikeIcon: () => handleLikeIcon(newCard, cardElement),
@@ -146,7 +140,7 @@ const handleCardFormSubmit = (evt) => {
         onInfoCard: () => {
           handleInfoClick(newCard._id);
         }
-      }, userData);
+      }, newCard.owner._id);
 
       placesWrap.prepend(cardElement);
       closeModalWindow(cardFormModalWindow);
@@ -260,7 +254,7 @@ Promise.all([getCardList(), getUserInfo()])
         onInfoCard: () => {
           handleInfoClick(card._id);
         }
-      }, userData);
+      }, userData._id);
       
       placesWrap.append(cardElement);
     });
