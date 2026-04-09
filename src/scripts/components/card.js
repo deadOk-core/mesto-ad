@@ -29,7 +29,7 @@ const getTemplate = () => {
 
 export const createCardElement = (
   data,
-  { onPreviewPicture, onLikeIcon, onDeleteCard, onInfoCard }, card, userData
+  { onPreviewPicture, onLikeIcon, onDeleteCard, onInfoCard }, userData
 ) => {
   const cardElement = getTemplate();
   const likeButton = cardElement.querySelector(".card__like-button");
@@ -42,14 +42,14 @@ export const createCardElement = (
   cardImage.alt = data.name;
   cardElement.querySelector(".card__title").textContent = data.name;
 
-  cardLikeCount.textContent = card.likes.length;
-  
-  isCardLikedStart(card, userData, likeButton);
+  cardLikeCount.textContent = data.likes.length;
+
+  isCardLikedStart(data, userData, likeButton);
   if (onLikeIcon) {
     likeButton.addEventListener("click", () => onLikeIcon(likeButton));
   }
 
-  hideOtherDeleteButtons(card, userData, deleteButton);
+  hideOtherDeleteButtons(data, userData, deleteButton);
   if (onDeleteCard) {
     deleteButton.addEventListener("click", () => onDeleteCard(cardElement));
   }

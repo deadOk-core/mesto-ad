@@ -146,7 +146,7 @@ const handleCardFormSubmit = (evt) => {
         onInfoCard: () => {
           handleInfoClick(newCard._id);
         }
-      }, newCard, userData);
+      }, userData);
 
       placesWrap.prepend(cardElement);
       closeModalWindow(cardFormModalWindow);
@@ -260,7 +260,7 @@ Promise.all([getCardList(), getUserInfo()])
         onInfoCard: () => {
           handleInfoClick(card._id);
         }
-      }, card, userData);
+      }, userData);
       
       placesWrap.append(cardElement);
     });
